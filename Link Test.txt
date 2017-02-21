@@ -1,0 +1,60 @@
+// ==UserScript==
+// @name        Links
+// @version     01
+// @author      Grey Winert
+// @include     *brightspace.com*
+// @description Highlights bad links
+// @run-at document-end
+// ==/UserScript==
+
+var size = 0;
+var itemsProcessed = 0;
+    console.log("Size: " + size);
+
+function linkCheck() {
+    var itemsProcessed = 0;
+
+    var $checker = $('a');
+    var size = $checker.length;
+    console.log("Size: " + size);
+
+    var $list = $();
+
+    $checker.each(function (anchor) {
+        var link = $(anchor).attr("href");
+        if ($(link).match(/http:\\/g))
+           return false;
+        itemsProcessed++;
+        $.ajax(link, {
+            type: 'HEAD',
+            success: function (response, status, xhr) {
+                var data = (status !== 200);
+                if (data) {
+                    $list.pushStack([anchor]);
+                }
+                console.log(link, data);
+            },
+            error: function (xhr, err) {
+                console.log("ERROR");
+            },
+            complete: function () {
+                console.log("Items: " + itemsProcessed);
+                if (itemsProcessed == size) {
+                    colorUp($list);
+                }
+            }
+        });
+    });
+}
+
+function colorUp(list) {
+
+    console.log("DONE");
+    $(list).css({
+        "border": "3px solid #ffb700",
+        "background": "repeating-linear-gradient(135deg, #FFE0B2, #FFE0B2 5px, #ffffff 5px, #ffffff 10px)"
+    });
+}
+
+
+linkCheck();
